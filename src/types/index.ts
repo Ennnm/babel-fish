@@ -7,7 +7,8 @@ export interface Message {
   sender: 'agent' | 'customer'
   tone?: Tone
   timestamp: number
-  language: string
+  language: string              // ISO code: 'en', 'zh', 'th', etc.
+  translatedLanguage?: string   // ISO code of target language
   references?: Reference[]
   threadId?: string
 }
