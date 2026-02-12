@@ -1,7 +1,7 @@
 import { useState, useEffect, type KeyboardEvent } from 'react'
 import { Send, Loader2 } from 'lucide-react'
 import { TranslationPreview } from './TranslationPreview'
-import { translateWithRetry } from '../../services/gemini'
+import { translateWithRetry } from '../../services/llm'
 
 interface ChatInputProps {
   onSend: (text: string, translatedText?: string) => void

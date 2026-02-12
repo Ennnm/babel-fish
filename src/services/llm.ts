@@ -1,7 +1,11 @@
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY
+// Gemini API (kept for potential future use)
+// const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY
+// const GEMINI_API_URL =
+//   'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent'
 
-const GEMINI_API_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent'
+// LM Studio Local LLM (proxied through Vite to avoid CORS)
+const LM_STUDIO_URL = '/api/llm/v1/chat/completions'
+const LM_STUDIO_MODEL = 'openai/gpt-oss-20b'
 
 export const LANGUAGE_NAMES: Record<string, string> = {
   en: 'English',
@@ -113,24 +117,33 @@ export function validateTone(tone: string): ToneValidationResult {
 }
 
 // =============================================================================
-// Single Translation (existing)
+// Single Translation
 // =============================================================================
 
-export async function callGemini(prompt: string): Promise<string> {
-  const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+interface LLMResponse {
+  choices: {
+    message: {
+      content: string
+    }
+  }[]
+}
+
+export async function callLLM(prompt: string): Promise<string> {
+  const response = await fetch(LM_STUDIO_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
+      model: LM_STUDIO_MODEL,
+      messages: [{ role: 'user', content: prompt }],
     }),
   })
 
   if (!response.ok) {
-    throw new Error(`Gemini API error: ${response.status}`)
+    throw new Error(`LLM API error: ${response.status}`)
   }
 
-  const data: GeminiResponse = await response.json()
-  return data.candidates[0].content.parts[0].text
+  const data: LLMResponse = await response.json()
+  return data.choices[0].message.content
 }
 
 export async function translate(
@@ -141,7 +154,7 @@ export async function translate(
   const targetLang = LANGUAGE_NAMES[targetLangCode] || targetLangCode
   const toneClause = tone ? ` with a ${tone} tone` : ''
   const prompt = `Translate to ${targetLang}${toneClause}. Only return the translation, nothing else.\n\nText: ${text}`
-  return callGemini(prompt)
+  return callLLM(prompt)
 }
 
 const MAX_RETRIES = 2
@@ -335,12 +348,12 @@ interface BatchRequestResult {
 
 async function executeBatchRequest(prompt: string): Promise<BatchRequestResult> {
   try {
-    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(LM_STUDIO_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: 'application/json' },
+        model: LM_STUDIO_MODEL,
+        messages: [{ role: 'user', content: prompt }],
       }),
     })
 
@@ -349,8 +362,8 @@ async function executeBatchRequest(prompt: string): Promise<BatchRequestResult> 
       return { text: null, status: response.status }
     }
 
-    const data: GeminiResponse = await response.json()
-    const responseText = data.candidates[0]?.content?.parts[0]?.text || null
+    const data: LLMResponse = await response.json()
+    const responseText = data.choices?.[0]?.message?.content || null
     console.log('[Batch] Raw response:', responseText)
     return { text: responseText, status: 200 }
   } catch (err) {

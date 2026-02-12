@@ -7,7 +7,7 @@ import {
   type BatchMessage,
   type BatchTranslateResult,
   type ToneValidationResult,
-} from '../services/gemini'
+} from '../services/llm'
 import type { Message, Tone } from '../types'
 
 const STORAGE_KEY = 'babel-fish-messages'
