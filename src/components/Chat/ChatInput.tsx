@@ -4,22 +4,30 @@ import { TranslationPreview } from './TranslationPreview'
 import { translateWithRetry } from '../../services/gemini'
 
 interface ChatInputProps {
-  onSend: (text: string, translatedText: string) => void
+  onSend: (text: string, translatedText?: string) => void
   customerLanguage: string
   disabled?: boolean
+  isTranslationOn: boolean
+  tone?: string
 }
 
 const DEBOUNCE_MS = 500
 
-export function ChatInput({ onSend, customerLanguage, disabled }: ChatInputProps) {
+export function ChatInput({
+  onSend,
+  customerLanguage,
+  disabled,
+  isTranslationOn,
+  tone,
+}: ChatInputProps) {
   const [text, setText] = useState('')
   const [translationPreview, setTranslationPreview] = useState('')
   const [isTranslating, setIsTranslating] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Debounced translation with retry
+  // Debounced translation with retry - only when fish mode is ON
   useEffect(() => {
-    if (!text.trim()) {
+    if (!isTranslationOn || !text.trim()) {
       setTranslationPreview('')
       setError(null)
       setIsTranslating(false)
@@ -31,7 +39,7 @@ export function ChatInput({ onSend, customerLanguage, disabled }: ChatInputProps
 
     const timer = setTimeout(async () => {
       try {
-        const translated = await translateWithRetry(text, customerLanguage)
+        const translated = await translateWithRetry(text, customerLanguage, tone)
         setTranslationPreview(translated)
         setError(null)
       } catch (err) {
@@ -43,11 +51,19 @@ export function ChatInput({ onSend, customerLanguage, disabled }: ChatInputProps
     }, DEBOUNCE_MS)
 
     return () => clearTimeout(timer)
-  }, [text, customerLanguage])
+  }, [text, customerLanguage, isTranslationOn, tone])
 
   const handleSend = () => {
     if (!canSend) return
-    onSend(text.trim(), translationPreview)
+
+    if (isTranslationOn) {
+      // Fish ON: send with translation
+      onSend(text.trim(), translationPreview || undefined)
+    } else {
+      // Fish OFF: send immediately without translation
+      onSend(text.trim())
+    }
+
     setText('')
     setTranslationPreview('')
     setError(null)
@@ -60,17 +76,21 @@ export function ChatInput({ onSend, customerLanguage, disabled }: ChatInputProps
     }
   }
 
-  // Can send when: has text, not translating, not disabled
-  const canSend = text.trim() && !isTranslating && !disabled
+  // Can send when:
+  // - Fish OFF: just need text
+  // - Fish ON: need text and not actively translating
+  const canSend = text.trim() && !disabled && (!isTranslationOn || !isTranslating)
 
   return (
     <div className="border-t border-gray-200 bg-white">
-      {/* Translation Preview */}
-      <TranslationPreview
-        text={translationPreview}
-        isLoading={isTranslating}
-        error={error || undefined}
-      />
+      {/* Translation Preview - only show when fish mode is ON */}
+      {isTranslationOn && (
+        <TranslationPreview
+          text={translationPreview}
+          isLoading={isTranslating}
+          error={error || undefined}
+        />
+      )}
 
       {/* Input Row */}
       <div className="p-4 flex items-center gap-2">
@@ -88,7 +108,7 @@ export function ChatInput({ onSend, customerLanguage, disabled }: ChatInputProps
           disabled={!canSend}
           className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {isTranslating ? (
+          {isTranslationOn && isTranslating ? (
             <Loader2 className="w-5 h-5 animate-spin" />
           ) : (
             <Send className="w-5 h-5" />

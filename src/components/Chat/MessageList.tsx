@@ -4,9 +4,10 @@ import type { Message } from '../../types'
 
 interface MessageListProps {
   messages: Message[]
+  isTranslationOn: boolean
 }
 
-export function MessageList({ messages }: MessageListProps) {
+export function MessageList({ messages, isTranslationOn }: MessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -24,7 +25,11 @@ export function MessageList({ messages }: MessageListProps) {
   return (
     <div className="flex-1 overflow-y-auto p-4">
       {messages.map((message) => (
-        <MessageBubble key={message.id} message={message} />
+        <MessageBubble
+          key={message.id}
+          message={message}
+          isTranslationOn={isTranslationOn}
+        />
       ))}
       <div ref={bottomRef} />
     </div>
