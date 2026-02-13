@@ -1,73 +1,116 @@
-# React + TypeScript + Vite
+# Babel Fish
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> "The Babel fish is small, yellow, leech-like, and probably the oddest thing in the Universe."
+> — *The Hitchhiker's Guide to the Galaxy*
 
-Currently, two official plugins are available:
+A real-time translation chat application that helps English-speaking agents communicate with clients in different languages. Built for OSOME Build Day 2026.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+![Babel Fish Conversation](./docs/04-conversation.png)
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Real-Time Translation
+- Fish toggle to enable/disable translation mode
+- Bidirectional translation (Chinese ↔ English and more)
+- Translation preview before sending
+- Batch translation for existing messages
+- Supported languages: Chinese, Thai, Vietnamese, Japanese, Korean, Hungarian, Russian, Tagalog
 
-## Expanding the ESLint configuration
+### Tone Modifiers
+- Preset tones: Happy, Formal, Casual, Angry, Playful, Sad
+- Custom tone input with prompt injection protection
+- Real-time preview with tone applied
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Speech-to-Text (STT)
+- Voice input via microphone
+- Whisper transcription (local)
+- Auto language detection
+- LLM cleanup for filler words and grammar
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Text-to-Speech (TTS)
+- Audio playback for translated messages
+- Bilingual voices (English & Chinese)
+- Local processing via Docker
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Screenshots
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Empty State
+![Empty State](./docs/01-empty-state.png)
+
+### Translation with Fish Toggle ON
+![Translation](./docs/02-fish-on-translation.png)
+
+### Tone Selection & Preview
+![Tone Preview](./docs/03-tone-preview.png)
+
+### Full Conversation
+![Conversation](./docs/04-conversation.png)
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Framework | React 19 + Vite + TypeScript |
+| Styling | Tailwind CSS v4 |
+| LLM | LM Studio (GPT-OSS 20B) |
+| STT | Whisper (via Docker) |
+| TTS | Piper (via LocalAI Docker) |
+| Storage | localStorage |
+
+## Prerequisites
+
+- Node.js 20+
+- LM Studio running on port 1234
+- Docker (for STT/TTS features)
+
+## Getting Started
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Open [http://localhost:5173](http://localhost:5173)
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+> **Tip:** Clear localStorage in browser DevTools (Application > Local Storage) for a fresh start.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm run preview` | Preview production build |
+| `npm run lint` | Run ESLint |
+
+## Project Structure
+
 ```
+babel-fish/
+├── src/
+│   ├── components/
+│   │   └── Chat/           # ChatContainer, MessageList, MessageBubble, etc.
+│   ├── services/
+│   │   ├── llm.ts          # LM Studio integration
+│   │   ├── stt.ts          # Speech-to-text service
+│   │   └── tts.ts          # Text-to-speech service
+│   ├── hooks/
+│   │   ├── useChat.ts      # Chat state management
+│   │   ├── useVoiceRecorder.ts
+│   │   ├── useTTS.ts
+│   │   └── useLocalStorage.ts
+│   └── types/
+└── docs/                   # Screenshots
+```
+
+## Related Links
+
+- [Notion TRD](https://www.notion.so/osome/Babel-30294fd5a8ec809ca09dc1b71c2dd33b)
+- [Jira Epic: OLS-131](https://reallyosome.atlassian.net/browse/OLS-131)
+
+## License
+
+Private - OSOME Build Day 2026
