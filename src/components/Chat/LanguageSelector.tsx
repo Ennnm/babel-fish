@@ -4,6 +4,9 @@ const LANGUAGES = [
   { code: 'vi', name: 'Vietnamese', flag: '🇻🇳' },
   { code: 'ja', name: 'Japanese', flag: '🇯🇵' },
   { code: 'ko', name: 'Korean', flag: '🇰🇷' },
+  { code: 'hu', name: 'Hungarian', flag: '🇭🇺' },
+  { code: 'ru', name: 'Russian', flag: '🇷🇺' },
+  { code: 'tl', name: 'Tagalog', flag: '🇵🇭' },
 ]
 
 interface LanguageSelectorProps {

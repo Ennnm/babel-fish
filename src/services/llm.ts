@@ -14,6 +14,9 @@ export const LANGUAGE_NAMES: Record<string, string> = {
   vi: 'Vietnamese',
   ja: 'Japanese',
   ko: 'Korean',
+  hu: 'Hungarian',
+  ru: 'Russian',
+  tl: 'Tagalog',
 }
 
 // =============================================================================

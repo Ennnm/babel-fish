@@ -32,6 +32,21 @@ const SAMPLE_CUSTOMER_MESSAGES: Record<string, string[]> = {
     '회사 등록에 도움이 필요합니다',
     '청구서 요구 사항은 무엇인가요?',
   ],
+  hu: [
+    'Szia, hogyan kell bejelenteni a GST-t?',
+    'Segítségre van szükségem a cégbejegyzéshez',
+    'Mik a számlázási követelmények?',
+  ],
+  ru: [
+    'Здравствуйте, как подать декларацию GST?',
+    'Мне нужна помощь с регистрацией компании',
+    'Какие требования к счетам-фактурам?',
+  ],
+  tl: [
+    'Kumusta, paano mag-file ng GST?',
+    'Kailangan ko ng tulong sa company registration',
+    'Ano ang mga requirements sa invoice?',
+  ],
 }
 
 export function ChatContainer() {
