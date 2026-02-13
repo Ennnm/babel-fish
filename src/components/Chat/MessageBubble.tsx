@@ -2,21 +2,35 @@ import type { Message } from '../../types'
 
 interface MessageBubbleProps {
   message: Message
+  isTranslationOn: boolean
 }
 
-export function MessageBubble({ message }: MessageBubbleProps) {
+function formatTime(timestamp: number): string {
+  return new Date(timestamp).toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+export function MessageBubble({ message, isTranslationOn }: MessageBubbleProps) {
   const isAgent = message.sender === 'agent'
 
-  // Always show customer language on top, English on bottom
-  const topText = isAgent ? message.translatedText : message.text
-  const bottomText = isAgent ? message.text : message.translatedText
+  // When translation is ON and we have translated text:
+  // - Customer messages: show original (customer lang) on top, translation (English) below
+  // - Agent messages: show translation (customer lang) on top, original (English) below
+  const showTranslation = isTranslationOn && message.translatedText
 
-  const formatTime = (timestamp: number) => {
-    return new Date(timestamp).toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
+  const topText = showTranslation
+    ? isAgent
+      ? message.translatedText
+      : message.text
+    : message.text
+
+  const bottomText = showTranslation
+    ? isAgent
+      ? message.text
+      : message.translatedText
+    : null
 
   return (
     <div className={`flex ${isAgent ? 'justify-end' : 'justify-start'} mb-3`}>
@@ -27,10 +41,10 @@ export function MessageBubble({ message }: MessageBubbleProps) {
             : 'bg-gray-200 text-gray-800 rounded-bl-none'
         }`}
       >
-        {/* Customer language (top) */}
-        {topText && <p className="text-sm">{topText}</p>}
+        {/* Primary text */}
+        <p className="text-sm">{topText}</p>
 
-        {/* Agent language / English (bottom) */}
+        {/* Translation (secondary) */}
         {bottomText && (
           <p
             className={`text-xs mt-1 italic ${
@@ -40,9 +54,6 @@ export function MessageBubble({ message }: MessageBubbleProps) {
             {bottomText}
           </p>
         )}
-
-        {/* Fallback if no translation yet */}
-        {!topText && !bottomText && <p className="text-sm">{message.text}</p>}
 
         {/* Timestamp */}
         <p

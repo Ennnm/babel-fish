@@ -2,6 +2,7 @@ import { Fish } from 'lucide-react'
 import { MessageList } from './MessageList'
 import { ChatInput } from './ChatInput'
 import { LanguageSelector } from './LanguageSelector'
+import { ControlsRow } from './ControlsRow'
 import { useChat } from '../../hooks/useChat'
 
 const SAMPLE_CUSTOMER_MESSAGES: Record<string, string[]> = {
@@ -31,6 +32,21 @@ const SAMPLE_CUSTOMER_MESSAGES: Record<string, string[]> = {
     '회사 등록에 도움이 필요합니다',
     '청구서 요구 사항은 무엇인가요?',
   ],
+  hu: [
+    'Szia, hogyan kell bejelenteni a GST-t?',
+    'Segítségre van szükségem a cégbejegyzéshez',
+    'Mik a számlázási követelmények?',
+  ],
+  ru: [
+    'Здравствуйте, как подать декларацию GST?',
+    'Мне нужна помощь с регистрацией компании',
+    'Какие требования к счетам-фактурам?',
+  ],
+  tl: [
+    'Kumusta, paano mag-file ng GST?',
+    'Kailangan ko ng tulong sa company registration',
+    'Ano ang mga requirements sa invoice?',
+  ],
 }
 
 export function ChatContainer() {
@@ -40,10 +56,26 @@ export function ChatContainer() {
     customerLanguage,
     setCustomerLanguage,
     addMessage,
+    // Fish mode
+    isTranslationOn,
+    isBatchTranslating,
+    batchError,
+    failedCount,
+    retryCountdown,
+    toggleTranslation,
+    retryBatchTranslation,
+    // Tone
+    selectedTone,
+    customToneText,
+    toneError,
+    setTone,
+    setCustomTone,
+    getEffectiveTone,
   } = useChat()
 
-  const handleSendMessage = (text: string, translatedText: string) => {
-    addMessage(text, 'agent', translatedText)
+  const handleSendMessage = (text: string, translatedText?: string) => {
+    const tone = isTranslationOn ? selectedTone : undefined
+    addMessage(text, 'agent', translatedText, tone ?? undefined)
   }
 
   const handleSimulateCustomer = () => {
@@ -67,7 +99,7 @@ export function ChatContainer() {
           />
           <button
             onClick={handleSimulateCustomer}
-            disabled={isLoading}
+            disabled={isLoading || isBatchTranslating}
             className="text-xs bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded-full transition-colors disabled:opacity-50"
           >
             + Simulate
@@ -76,13 +108,31 @@ export function ChatContainer() {
       </div>
 
       {/* Messages */}
-      <MessageList messages={messages} />
+      <MessageList messages={messages} isTranslationOn={isTranslationOn} />
+
+      {/* Controls Row (Fish Toggle + Tone Selector) */}
+      <ControlsRow
+        isTranslationOn={isTranslationOn}
+        isBatchTranslating={isBatchTranslating}
+        batchError={batchError}
+        failedCount={failedCount}
+        retryCountdown={retryCountdown}
+        onToggle={toggleTranslation}
+        onRetry={retryBatchTranslation}
+        selectedTone={selectedTone}
+        customToneText={customToneText}
+        toneError={toneError}
+        onToneSelect={setTone}
+        onCustomToneChange={setCustomTone}
+      />
 
       {/* Input */}
       <ChatInput
         onSend={handleSendMessage}
         customerLanguage={customerLanguage}
-        disabled={isLoading}
+        disabled={isLoading || isBatchTranslating}
+        isTranslationOn={isTranslationOn}
+        tone={getEffectiveTone()}
       />
     </div>
   )

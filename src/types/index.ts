@@ -1,4 +1,4 @@
-export type Tone = 'happy' | 'formal' | 'casual' | 'angry' | 'playful' | 'sad'
+export type Tone = 'happy' | 'formal' | 'casual' | 'angry' | 'playful' | 'sad' | 'custom'
 
 export interface Message {
   id: string
