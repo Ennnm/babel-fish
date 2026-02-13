@@ -6,6 +6,7 @@
 A real-time translation chat application that helps English-speaking agents communicate with clients in different languages. Built for OSOME Build Day 2026.
 
 ![Babel Fish Conversation](./docs/04-conversation.png)
+<img width="673" height="968" alt="Screenshot 2026-02-13 at 5 59 26 PM" src="https://github.com/user-attachments/assets/c8b874f5-df94-4334-b2e5-4273200d61eb" />
 
 ## Features
 
