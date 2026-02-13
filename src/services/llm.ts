@@ -242,6 +242,57 @@ export async function applyToneWithRetry(text: string, tone: string): Promise<st
 }
 
 // =============================================================================
+// Transcript Cleanup
+// =============================================================================
+
+/**
+ * Clean up a speech transcript using LLM.
+ * Fixes filler words, punctuation, capitalization, grammar, and misheard words.
+ */
+export async function cleanupTranscript(rawText: string): Promise<string> {
+  const prompt = `Clean up this speech transcript for a chat message. Apply these fixes:
+
+1. Remove filler words (um, uh, like, you know, so, basically, actually, I mean)
+2. Fix punctuation and capitalization
+3. Fix grammar issues
+4. IMPORTANT: If a word seems wrong but sounds similar to a more contextually appropriate word, replace it with the correct word (e.g., "I want to by a car" → "I want to buy a car", "their going to the store" → "they're going to the store")
+
+Keep the original meaning and intent. Only return the cleaned text, nothing else.
+
+Transcript: ${rawText}`
+
+  return await callLLM(prompt)
+}
+
+export interface CleanupResult {
+  cleaned: string
+  raw: string
+  usedFallback: boolean
+}
+
+/**
+ * Clean up transcript with retry logic.
+ * Falls back to raw transcript if cleanup fails.
+ */
+export async function cleanupTranscriptWithFallback(rawText: string): Promise<CleanupResult> {
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const cleaned = await cleanupTranscript(rawText)
+      return { cleaned, raw: rawText, usedFallback: false }
+    } catch (err) {
+      console.warn(`Cleanup attempt ${attempt}/${MAX_RETRIES} failed:`, err)
+      if (attempt < MAX_RETRIES) {
+        await delay(RETRY_DELAY)
+      }
+    }
+  }
+
+  // Fallback to raw transcript
+  console.warn('Cleanup failed, using raw transcript')
+  return { cleaned: rawText, raw: rawText, usedFallback: true }
+}
+
+// =============================================================================
 // Batch Translation - Prompt Building
 // =============================================================================
 
