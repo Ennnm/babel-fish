@@ -2,6 +2,8 @@ import { useState, useEffect, type KeyboardEvent } from 'react'
 import { Send, Loader2 } from 'lucide-react'
 import { TranslationPreview } from './TranslationPreview'
 import { translateWithRetry, applyToneWithRetry } from '../../services/llm'
+import { useTTS } from '../../hooks/useTTS'
+import { isTTSSupported } from '../../services/tts'
 
 interface ChatInputProps {
   onSend: (text: string, translatedText?: string) => void
@@ -25,6 +27,7 @@ export function ChatInput({
   const [tonedOriginal, setTonedOriginal] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const { speak, isPlaying: isTTSPlaying } = useTTS()
 
   const hasTone = !!tone
   const needsProcessing = isTranslationOn || hasTone
@@ -100,6 +103,12 @@ export function ChatInput({
   // - If processing needed, must not be actively processing
   const canSend = text.trim() && !disabled && (!needsProcessing || !isProcessing)
 
+  const handlePlayTTS = () => {
+    if (translationPreview && customerLanguage) {
+      speak(translationPreview, customerLanguage)
+    }
+  }
+
   // Determine preview text and label
   const showPreview = needsProcessing && text.trim()
   const previewText = isTranslationOn ? translationPreview : tonedOriginal
@@ -115,6 +124,9 @@ export function ChatInput({
           isLoading={isProcessing}
           error={error || undefined}
           label={previewLabel}
+          showTTS={isTranslationOn && isTTSSupported(customerLanguage)}
+          onPlayTTS={handlePlayTTS}
+          isTTSPlaying={isTTSPlaying}
         />
       )}
 
