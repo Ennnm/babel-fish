@@ -213,6 +213,35 @@ export async function translateWithRetry(
 }
 
 // =============================================================================
+// Tone Application (without translation)
+// =============================================================================
+
+export async function applyTone(text: string, tone: string): Promise<string> {
+  const prompt = `Rewrite this message with a ${tone} tone. Only return the rewritten message, nothing else.
+
+Message: ${text}`
+  return await callLLM(prompt)
+}
+
+export async function applyToneWithRetry(text: string, tone: string): Promise<string> {
+  let lastError: Error | null = null
+
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      return await applyTone(text, tone)
+    } catch (err) {
+      lastError = err as Error
+      console.warn(`Tone application attempt ${attempt}/${MAX_RETRIES} failed:`, err)
+      if (attempt < MAX_RETRIES) {
+        await delay(RETRY_DELAY)
+      }
+    }
+  }
+
+  throw lastError || new Error('Tone application failed after retries')
+}
+
+// =============================================================================
 // Batch Translation - Prompt Building
 // =============================================================================
 

@@ -45,15 +45,13 @@ export function ControlsRow({
         onRetry={onRetry}
       />
 
-      {isTranslationOn && (
-        <ToneSelector
-          selectedTone={selectedTone}
-          customToneText={customToneText}
-          toneError={toneError}
-          onToneSelect={onToneSelect}
-          onCustomToneChange={onCustomToneChange}
-        />
-      )}
+      <ToneSelector
+        selectedTone={selectedTone}
+        customToneText={customToneText}
+        toneError={toneError}
+        onToneSelect={onToneSelect}
+        onCustomToneChange={onCustomToneChange}
+      />
     </div>
   )
 }
