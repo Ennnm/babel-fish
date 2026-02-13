@@ -211,10 +211,10 @@ export function useChat() {
       if (sender === 'customer' && isTranslationOn && !translatedText) {
         setIsLoading(true)
         try {
-          const translated = await translateWithRetry(text, agentLanguage)
+          const result = await translateWithRetry(text, agentLanguage)
           setMessages((prev) =>
             prev.map((msg) =>
-              msg.id === newMessage.id ? { ...msg, translatedText: translated } : msg
+              msg.id === newMessage.id ? { ...msg, translatedText: result.translation } : msg
             )
           )
         } catch (error) {

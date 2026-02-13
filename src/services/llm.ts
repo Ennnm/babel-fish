@@ -149,15 +149,42 @@ export async function callLLM(prompt: string): Promise<string> {
   return data.choices[0].message.content
 }
 
+export interface TranslationResult {
+  translation: string
+  tonedOriginal?: string
+}
+
 export async function translate(
   text: string,
   targetLangCode: string,
   tone?: string
-): Promise<string> {
+): Promise<TranslationResult> {
   const targetLang = LANGUAGE_NAMES[targetLangCode] || targetLangCode
-  const toneClause = tone ? ` with a ${tone} tone` : ''
-  const prompt = `Translate to ${targetLang}${toneClause}. Only return the translation, nothing else.\n\nText: ${text}`
-  return callLLM(prompt)
+
+  if (!tone) {
+    // No tone: simple translation
+    const prompt = `Translate to ${targetLang}. Only return the translation, nothing else.\n\nText: ${text}`
+    const translation = await callLLM(prompt)
+    return { translation }
+  }
+
+  // With tone: get both in one call
+  const prompt = `Apply a ${tone} tone to this message and translate it to ${targetLang}.
+
+Original: ${text}
+
+Return ONLY a JSON object:
+{
+  "tonedOriginal": "the message rewritten with ${tone} tone in English",
+  "translation": "the translation in ${targetLang} with ${tone} tone"
+}`
+
+  const response = await callLLM(prompt)
+  const parsed = JSON.parse(response)
+  return {
+    translation: parsed.translation,
+    tonedOriginal: parsed.tonedOriginal,
+  }
 }
 
 const MAX_RETRIES = 2
@@ -167,7 +194,7 @@ export async function translateWithRetry(
   text: string,
   targetLangCode: string,
   tone?: string
-): Promise<string> {
+): Promise<TranslationResult> {
   let lastError: Error | null = null
 
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {

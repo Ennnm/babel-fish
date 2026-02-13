@@ -1,10 +1,16 @@
 interface TranslationPreviewProps {
   text: string
+  tonedOriginal?: string
   isLoading: boolean
   error?: string
 }
 
-export function TranslationPreview({ text, isLoading, error }: TranslationPreviewProps) {
+export function TranslationPreview({
+  text,
+  tonedOriginal,
+  isLoading,
+  error,
+}: TranslationPreviewProps) {
   if (!text && !isLoading && !error) return null
 
   return (
@@ -15,7 +21,12 @@ export function TranslationPreview({ text, isLoading, error }: TranslationPrevie
       ) : error ? (
         <p className="text-sm text-red-500">{error}</p>
       ) : (
-        <p className="text-sm text-gray-700">{text}</p>
+        <>
+          <p className="text-sm text-gray-700">{text}</p>
+          {tonedOriginal && (
+            <p className="text-xs text-gray-500 italic mt-1">{tonedOriginal}</p>
+          )}
+        </>
       )}
     </div>
   )

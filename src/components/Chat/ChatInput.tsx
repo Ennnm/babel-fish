@@ -22,6 +22,7 @@ export function ChatInput({
 }: ChatInputProps) {
   const [text, setText] = useState('')
   const [translationPreview, setTranslationPreview] = useState('')
+  const [tonedOriginal, setTonedOriginal] = useState('')
   const [isTranslating, setIsTranslating] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -29,6 +30,7 @@ export function ChatInput({
   useEffect(() => {
     if (!isTranslationOn || !text.trim()) {
       setTranslationPreview('')
+      setTonedOriginal('')
       setError(null)
       setIsTranslating(false)
       return
@@ -39,12 +41,14 @@ export function ChatInput({
 
     const timer = setTimeout(async () => {
       try {
-        const translated = await translateWithRetry(text, customerLanguage, tone)
-        setTranslationPreview(translated)
+        const result = await translateWithRetry(text, customerLanguage, tone)
+        setTranslationPreview(result.translation)
+        setTonedOriginal(result.tonedOriginal || '')
         setError(null)
       } catch (err) {
         setError('Translation failed. You can still send the message.')
         setTranslationPreview('')
+        setTonedOriginal('')
       } finally {
         setIsTranslating(false)
       }
@@ -66,6 +70,7 @@ export function ChatInput({
 
     setText('')
     setTranslationPreview('')
+    setTonedOriginal('')
     setError(null)
   }
 
@@ -87,6 +92,7 @@ export function ChatInput({
       {isTranslationOn && (
         <TranslationPreview
           text={translationPreview}
+          tonedOriginal={tonedOriginal}
           isLoading={isTranslating}
           error={error || undefined}
         />
