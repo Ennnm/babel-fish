@@ -1,0 +1,26 @@
+services:
+  localai:
+    image: localai/localai:master-aio-cpu
+    container_name: localai-audio
+    ports:
+      - "8080:8080"
+    volumes:
+      - localai-models:/models
+    environment:
+      - DEBUG=false
+
+  whisper:
+    build: ./whisper-server
+    container_name: localai-whisper
+    ports:
+      - "8081:8081"
+    volumes:
+      - whisper-cache:/root/.cache
+    environment:
+      - WHISPER_MODEL=base
+      - WHISPER_DEVICE=cpu
+      - WHISPER_COMPUTE_TYPE=int8
+
+volumes:
+  localai-models:
+  whisper-cache:
